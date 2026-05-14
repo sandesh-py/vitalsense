@@ -70,7 +70,7 @@ def train_models():
     print("\n  [*] Training RandomForestClassifier...")
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
-    clf = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
+    clf = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=1)
     clf.fit(X_train, y_train)
 
     y_pred = clf.predict(X_test)
@@ -87,7 +87,7 @@ def train_models():
 
     # ── Train Isolation Forest ──
     print("\n  [*] Training IsolationForest...")
-    iso = IsolationForest(contamination=0.08, random_state=42, n_jobs=-1)
+    iso = IsolationForest(contamination=0.08, random_state=42, n_jobs=1)
     iso.fit(X)
 
     iso_path = MODEL_DIR / "anomaly_detector.pkl"
