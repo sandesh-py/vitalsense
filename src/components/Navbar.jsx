@@ -3,8 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Activity, Menu, X } from 'lucide-react';
 
 const navLinks = [
-  { label: 'Problem', href: '#problem' },
-  { label: 'How It Works', href: '#how-it-works' },
   { label: 'Dashboard', href: '#dashboard' },
   { label: 'Anomaly Detection', href: '#anomaly' },
   { label: 'Tech Stack', href: '#tech-stack' },

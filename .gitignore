@@ -28,4 +28,5 @@ venv/
 __pycache__/
 vitalsense-backend/data/*.db
 vitalsense-backend/.env
+.env
 .vercel

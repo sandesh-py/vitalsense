@@ -92,5 +92,8 @@ async def vitals_websocket(websocket: WebSocket):
                 })
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-    except Exception:
+    except Exception as e:
+        print(f"  [!] WebSocket error: {e}")
+        import traceback
+        traceback.print_exc()
         manager.disconnect(websocket)

@@ -2,8 +2,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-import Problem from './components/Problem';
-import HowItWorks from './components/HowItWorks';
 import DashboardPreview from './components/DashboardPreview';
 import AnomalyDemo from './components/AnomalyDemo';
 import Features from './components/Features';
@@ -27,8 +25,6 @@ function App() {
 
       {/* Main Content Sections */}
       <Hero />
-      <div id="problem"><Problem /></div>
-      <div id="how-it-works"><HowItWorks /></div>
       <div id="dashboard"><DashboardPreview /></div>
       <div id="anomaly"><AnomalyDemo /></div>
       <Features />

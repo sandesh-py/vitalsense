@@ -19,8 +19,11 @@ from data.generator import generate_reading
 from ml.predict import predict_condition, detect_anomaly, compute_rolling_features
 from api.websocket import manager
 
-# Track active alert state to avoid duplicate alerts
+# Track active alert state and streaks for stability
 _active_alert_type = None
+_anomaly_streak = 0
+_normal_streak = 0
+STABILITY_THRESHOLD = 3
 
 
 def _get_recent_readings(db, n: int = 10) -> list[dict]:
@@ -77,7 +80,7 @@ def _get_triggered_value(anomaly_type: str, vitals: dict) -> float:
 
 async def monitor_tick():
     """One iteration of the monitoring loop."""
-    global _active_alert_type
+    global _active_alert_type, _anomaly_streak, _normal_streak
 
     db = SessionLocal()
     try:
@@ -115,52 +118,60 @@ async def monitor_tick():
         # 5. Alert logic
         alert_msg = None
         if vitals["anomaly_active"] and vitals["anomaly_type"]:
-            atype = vitals["anomaly_type"]
-            if _active_alert_type != atype:
-                # New anomaly — create alert
-                _active_alert_type = atype
-                severity = _determine_severity(atype, vitals)
-                triggered_val = _get_triggered_value(atype, vitals)
-                threshold_val = _get_threshold(atype)
+            _normal_streak = 0
+            _anomaly_streak += 1
+            
+            if _anomaly_streak >= STABILITY_THRESHOLD:
+                atype = vitals["anomaly_type"]
+                if _active_alert_type != atype:
+                    # New anomaly — create alert
+                    _active_alert_type = atype
+                    severity = _determine_severity(atype, vitals)
+                    triggered_val = _get_triggered_value(atype, vitals)
+                    threshold_val = _get_threshold(atype)
 
-                alert = AlertEvent(
-                    patient_id=vitals["patient_id"],
-                    alert_type=atype,
-                    severity=severity,
-                    triggered_value=triggered_val,
-                    threshold_value=threshold_val,
-                    message=f"{atype} detected: {triggered_val} (threshold: {threshold_val})",
-                )
-                db.add(alert)
-                db.commit()
-                db.refresh(alert)
+                    alert = AlertEvent(
+                        patient_id=vitals["patient_id"],
+                        alert_type=atype,
+                        severity=severity,
+                        triggered_value=triggered_val,
+                        threshold_value=threshold_val,
+                        message=f"{atype} detected: {triggered_val} (threshold: {threshold_val})",
+                    )
+                    db.add(alert)
+                    db.commit()
+                    db.refresh(alert)
 
-                alert_msg = {
-                    "type": "alert",
-                    "timestamp": datetime.utcnow().isoformat(),
-                    "patient_id": vitals["patient_id"],
-                    "data": {
-                        "alert_id": alert.id,
-                        "alert_type": atype,
-                        "severity": severity,
-                        "triggered_value": triggered_val,
-                        "threshold_value": threshold_val,
-                        "message": alert.message,
-                    },
-                }
+                    alert_msg = {
+                        "type": "alert",
+                        "timestamp": datetime.utcnow().isoformat(),
+                        "patient_id": vitals["patient_id"],
+                        "data": {
+                            "alert_id": alert.id,
+                            "alert_type": atype,
+                            "severity": severity,
+                            "triggered_value": triggered_val,
+                            "threshold_value": threshold_val,
+                            "message": alert.message,
+                        },
+                    }
         else:
-            # Anomaly resolved — update active alerts
-            if _active_alert_type is not None:
-                unresolved = (
-                    db.query(AlertEvent)
-                    .filter(AlertEvent.alert_type == _active_alert_type, AlertEvent.resolved == False)
-                    .all()
-                )
-                for a in unresolved:
-                    a.resolved = True
-                    a.resolved_at = datetime.utcnow()
-                db.commit()
-                _active_alert_type = None
+            _anomaly_streak = 0
+            _normal_streak += 1
+            
+            if _normal_streak >= STABILITY_THRESHOLD:
+                # Anomaly resolved — update active alerts
+                if _active_alert_type is not None:
+                    unresolved = (
+                        db.query(AlertEvent)
+                        .filter(AlertEvent.alert_type == _active_alert_type, AlertEvent.resolved == False)
+                        .all()
+                    )
+                    for a in unresolved:
+                        a.resolved = True
+                        a.resolved_at = datetime.utcnow()
+                    db.commit()
+                    _active_alert_type = None
 
         # 6. Broadcast via WebSocket
         reading_out = VitalReadingOut.model_validate(reading).model_dump(mode="json")
