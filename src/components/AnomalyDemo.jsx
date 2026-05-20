@@ -35,24 +35,42 @@ export default function AnomalyDemo() {
 
   // Update Z-Score and alert phase based on real-time live data
   useEffect(() => {
-    if (!vitals || dataPoints.length === 0) return;
+    if (!vitals || history.length === 0) return;
 
-    if (dataPoints.length > 2) {
-      // Simple rolling z-score estimation based on visible window
-      const mean = dataPoints.reduce((a, b) => a + b, 0) / dataPoints.length;
-      const std = Math.sqrt(dataPoints.reduce((a, b) => a + (b - mean) ** 2, 0) / dataPoints.length) || 1;
-      const z = ((vitals.heart_rate - mean) / std).toFixed(2);
-      setZScore(z);
+    // 1. Variance Masking Z-Score Fix:
+    // Calculate baseline mean and standard deviation exclusively from healthy historical points
+    // to prevent the outlier points from inflating the variance and masking the Z-score.
+    const healthyHistory = history.filter(r => !r.anomaly_active);
+    let mean = 75.0;
+    let std = 5.5;
+
+    if (healthyHistory.length >= 5) {
+      const hrs = healthyHistory.map(r => r.heart_rate);
+      mean = hrs.reduce((a, b) => a + b, 0) / hrs.length;
+      const variance = hrs.reduce((a, b) => a + (b - mean) ** 2, 0) / hrs.length;
+      std = Math.sqrt(variance) || 1.0;
+      // Clamp std to a minimum of 2.0 to prevent division by tiny values on flat lines
+      if (std < 2.0) std = 2.0;
     }
 
+    const z = ((vitals.heart_rate - mean) / std).toFixed(2);
+    setZScore(z);
+
+    // 2. Blinking Alert Card Fix:
+    // Only transition to 'detecting' if we are not already in 'alert' or 'detecting' state.
+    // This stops the card from constantly blinking/resetting on every 1s WebSocket packet.
     if (isAnomalous) {
-      setPhase('detecting');
-      const timeout = setTimeout(() => setPhase('alert'), 600);
-      return () => clearTimeout(timeout);
+      if (phase !== 'alert' && phase !== 'detecting') {
+        setPhase('detecting');
+        const timeout = setTimeout(() => {
+          setPhase('alert');
+        }, 600);
+        return () => clearTimeout(timeout);
+      }
     } else {
       setPhase('streaming');
     }
-  }, [vitals, isAnomalous]);
+  }, [vitals, isAnomalous, history, phase]);
 
   return (
     <section className="section" ref={ref} style={{ background: 'linear-gradient(180deg, var(--navy) 0%, var(--navy-light) 50%, var(--navy) 100%)', overflow: 'hidden' }}>

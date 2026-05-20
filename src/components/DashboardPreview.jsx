@@ -115,10 +115,8 @@ export default function DashboardPreview() {
                 </div>
                 <div style={{ width: '100%', height: 'calc(100% - 30px)' }}>
                   <ECGCanvas
-                    width={560}
-                    height={200}
                     color={showAnomaly ? '#ff3366' : '#00FF88'}
-                    speed={showAnomaly ? 3.5 : 2}
+                    heartRate={hr}
                     lineWidth={2}
                   />
                 </div>

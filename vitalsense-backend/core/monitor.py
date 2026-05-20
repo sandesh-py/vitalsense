@@ -23,7 +23,7 @@ from api.websocket import manager
 _active_alert_type = None
 _anomaly_streak = 0
 _normal_streak = 0
-STABILITY_THRESHOLD = 3
+STABILITY_THRESHOLD = 2
 
 
 def _get_recent_readings(db, n: int = 10) -> list[dict]:
