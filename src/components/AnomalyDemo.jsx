@@ -92,15 +92,7 @@ export default function AnomalyDemo() {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          style={{
-            maxWidth: '1000px',
-            margin: '0 auto',
-            borderRadius: '20px',
-            background: 'rgba(10, 15, 30, 0.9)',
-            border: '1px solid rgba(0, 245, 255, 0.15)',
-            boxShadow: '0 25px 60px -12px rgba(0, 0, 0, 0.6)',
-            overflow: 'hidden'
-          }}
+          className="anomaly-demo-container"
         >
           {/* Header Bar */}
           <div style={{
@@ -126,9 +118,9 @@ export default function AnomalyDemo() {
           </div>
 
           {/* Body */}
-          <div style={{ display: 'flex', gap: 0 }}>
+          <div className="anomaly-demo-body">
             {/* Left — Chart Area */}
-            <div style={{ flex: 2, padding: '1.5rem', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+            <div className="anomaly-demo-left">
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                 <h4 style={{ color: '#8c9bb4', margin: 0 }}>Live Heart Rate Stream (bpm)</h4>
                 <span style={{ color: isAnomalous ? '#ff3366' : 'var(--green)', fontWeight: 700, fontSize: '1.4rem', fontFamily: 'var(--font-mono)' }}>
@@ -226,7 +218,7 @@ export default function AnomalyDemo() {
             </div>
 
             {/* Right — Detection Panel */}
-            <div style={{ flex: 1, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', minWidth: '260px' }}>
+            <div className="anomaly-demo-right">
               {/* Model Info */}
               <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '1rem', border: '1px solid rgba(255,255,255,0.06)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>

@@ -162,3 +162,151 @@
   border-radius: 12px;
   padding: 1.5rem;
 }
+
+/* ==========================================================================
+   Responsive Dashboard & Anomaly Demo Premium Layout
+   ========================================================================== */
+
+/* Dashboard Premium Card */
+.dashboard-card {
+  width: 100%;
+  max-width: 1200px !important; /* Increased from 960px to look proper and massive */
+  margin: 0 auto;
+  border-radius: 20px;
+  padding: 24px;
+  background: rgba(10, 15, 30, 0.9);
+  border: 1px solid rgba(0, 245, 255, 0.2);
+  backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  transform-style: preserve-3d;
+  transition: border-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+.dashboard-card.anomaly-active {
+  border-color: rgba(255, 51, 102, 0.45) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 51, 102, 0.2) !important;
+}
+
+.dashboard-card.normal-active {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 245, 255, 0.1) !important;
+}
+
+/* Dashboard Body and Grid columns */
+.dashboard-body-layout {
+  display: flex;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.dashboard-charts-col {
+  flex: 2.2; /* Expand charts column width to look grand and easy to read */
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.dashboard-metrics-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 240px;
+}
+
+.metric-cards-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Anomaly Demo Layout */
+.anomaly-demo-container {
+  width: 100%;
+  max-width: 1200px !important; /* Matches dashboard width */
+  margin: 0 auto;
+  border-radius: 20px;
+  background: rgba(10, 15, 30, 0.9);
+  border: 1px solid rgba(0, 245, 255, 0.15);
+  box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+
+.anomaly-demo-body {
+  display: flex;
+  width: 100%;
+}
+
+.anomaly-demo-left {
+  flex: 2.2;
+  padding: 1.5rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.anomaly-demo-right {
+  flex: 1;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 260px;
+}
+
+/* Media Queries for Tablet/Mobile Sizing */
+@media (max-width: 1024px) {
+  .dashboard-body-layout {
+    flex-direction: column; /* Stack columns on smaller screens */
+    gap: 1.5rem;
+  }
+  
+  .dashboard-charts-col {
+    width: 100%;
+  }
+
+  .dashboard-metrics-col {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .metric-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2x2 grid for metric cards on tablet */
+    gap: 0.75rem;
+  }
+  
+  .anomaly-demo-body {
+    flex-direction: column;
+  }
+
+  .anomaly-demo-left {
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    width: 100%;
+  }
+
+  .anomaly-demo-right {
+    width: 100%;
+    min-width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .metric-cards-grid {
+    grid-template-columns: 1fr; /* 1 column grid for cards on mobile */
+  }
+  
+  .dashboard-card {
+    padding: 16px;
+  }
+  
+  /* Make chart boxes slightly more compact on small phones */
+  .dashboard-charts-col > div {
+    height: 180px !important;
+  }
+  
+  .dashboard-charts-col > div:last-child {
+    height: 150px !important;
+  }
+}
+

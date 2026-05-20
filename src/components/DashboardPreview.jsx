@@ -13,9 +13,9 @@ export default function DashboardPreview() {
     offset: ["start end", "end start"]
   });
 
-  const rotateX = useTransform(scrollYProgress, [0, 0.5, 1], [15, 0, -15]);
-  const rotateY = useTransform(scrollYProgress, [0, 0.5, 1], [-10, 0, 10]);
-  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.85, 1, 0.85]);
+  const rotateX = useTransform(scrollYProgress, [0, 0.5, 1], [3, 0, -3]);
+  const rotateY = useTransform(scrollYProgress, [0, 0.5, 1], [-2, 0, 2]);
+  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.98, 1, 0.98]);
 
   // Extract live values or use fallbacks
   const hr = vitals?.heart_rate ?? 75;
@@ -46,25 +46,11 @@ export default function DashboardPreview() {
 
         <div style={{ perspective: '1200px', display: 'flex', justifyContent: 'center' }}>
           <motion.div
+            className={`dashboard-card ${showAnomaly ? 'anomaly-active' : 'normal-active'}`}
             style={{
               rotateX,
               rotateY,
               scale,
-              width: '100%',
-              maxWidth: '960px',
-              borderRadius: '20px',
-              padding: '24px',
-              background: 'rgba(10, 15, 30, 0.9)',
-              border: `1px solid ${showAnomaly ? 'rgba(255, 51, 102, 0.4)' : 'rgba(0, 245, 255, 0.2)'}`,
-              boxShadow: showAnomaly
-                ? '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 51, 102, 0.15)'
-                : '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 245, 255, 0.1)',
-              backdropFilter: 'blur(20px)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '1.5rem',
-              transformStyle: 'preserve-3d',
-              transition: 'border-color 0.5s ease, box-shadow 0.5s ease'
             }}
           >
             {/* Dashboard Header */}
@@ -105,72 +91,100 @@ export default function DashboardPreview() {
             </div>
 
             {/* Dashboard Body */}
-            <div style={{ display: 'flex', gap: '1.5rem', flex: 1, transform: 'translateZ(50px)' }}>
+            <div className="dashboard-body-layout" style={{ transform: 'translateZ(50px)' }}>
 
-              {/* Left Column - ECG Chart */}
-              <div style={{ flex: 2, background: 'rgba(0,0,0,0.3)', borderRadius: '12px', padding: '1.25rem', border: '1px solid rgba(255,255,255,0.05)', position: 'relative', overflow: 'hidden', minHeight: '260px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                  <h4 style={{ color: '#8c9bb4', margin: 0, fontSize: '0.9rem' }}>Lead II — Continuous ECG</h4>
-                  <span style={{ color: 'var(--green)', fontSize: '0.75rem', fontWeight: 500 }}>● LIVE</span>
+              {/* Left Column - Multi-Wave Patient Monitor Charts */}
+              <div className="dashboard-charts-col">
+                
+                {/* ECG Chart Panel */}
+                <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '12px', padding: '1rem 1.25rem 1.25rem 1.25rem', border: '1px solid rgba(255,255,255,0.05)', position: 'relative', overflow: 'hidden', height: '210px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <h4 style={{ color: '#8c9bb4', margin: 0, fontSize: '0.85rem', fontWeight: 600 }}>Lead II — Continuous ECG</h4>
+                    <span style={{ color: showAnomaly ? '#ff3366' : 'var(--green)', fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.5px' }}>
+                      ● {showAnomaly ? 'ANOMALY DETECTED' : 'LIVE'}
+                    </span>
+                  </div>
+                  <div style={{ width: '100%', height: 'calc(100% - 22px)' }}>
+                    <ECGCanvas
+                      waveType="ecg"
+                      color={showAnomaly ? '#ff3366' : '#00FF88'}
+                      heartRate={hr}
+                      lineWidth={2}
+                    />
+                  </div>
                 </div>
-                <div style={{ width: '100%', height: 'calc(100% - 30px)' }}>
-                  <ECGCanvas
-                    color={showAnomaly ? '#ff3366' : '#00FF88'}
-                    heartRate={hr}
-                    lineWidth={2}
-                  />
+
+                {/* SpO2 Plethysmograph Chart Panel */}
+                <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '12px', padding: '1rem 1.25rem 1.25rem 1.25rem', border: '1px solid rgba(255,255,255,0.05)', position: 'relative', overflow: 'hidden', height: '170px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <h4 style={{ color: '#8c9bb4', margin: 0, fontSize: '0.85rem', fontWeight: 600 }}>Plethysmogram — Continuous SpO₂</h4>
+                    <span style={{ color: spo2 < 94 ? '#ff3366' : 'var(--cyan)', fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.5px' }}>
+                      ● {spo2 < 94 ? 'HYPOXIA ALERT' : 'LIVE'}
+                    </span>
+                  </div>
+                  <div style={{ width: '100%', height: 'calc(100% - 22px)' }}>
+                    <ECGCanvas
+                      waveType="pleth"
+                      color={spo2 < 94 ? '#ff3366' : '#00F5FF'}
+                      heartRate={hr}
+                      lineWidth={1.75}
+                    />
+                  </div>
                 </div>
+
               </div>
 
               {/* Right Column - Metric Cards */}
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem', transform: 'translateZ(20px)', minWidth: '200px' }}>
-                {/* Heart Rate */}
-                <div style={{
-                  background: hrIsAnomaly ? 'rgba(255, 51, 102, 0.12)' : 'rgba(255, 51, 102, 0.06)',
-                  padding: '1rem', borderRadius: '12px',
-                  border: `1px solid ${hrIsAnomaly ? 'rgba(255, 51, 102, 0.4)' : 'rgba(255, 51, 102, 0.15)'}`,
-                  transition: 'all 0.4s ease'
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: hrIsAnomaly ? '#ff3366' : '#cc4466', marginBottom: '0.25rem', fontSize: '0.85rem' }}>
-                    <span>Heart Rate</span> <Heart size={16} />
+              <div className="dashboard-metrics-col" style={{ transform: 'translateZ(20px)' }}>
+                <div className="metric-cards-grid">
+                  {/* Heart Rate */}
+                  <div style={{
+                    background: hrIsAnomaly ? 'rgba(255, 51, 102, 0.12)' : 'rgba(255, 51, 102, 0.06)',
+                    padding: '1rem', borderRadius: '12px',
+                    border: `1px solid ${hrIsAnomaly ? 'rgba(255, 51, 102, 0.4)' : 'rgba(255, 51, 102, 0.15)'}`,
+                    transition: 'all 0.4s ease'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', color: hrIsAnomaly ? '#ff3366' : '#cc4466', marginBottom: '0.25rem', fontSize: '0.85rem' }}>
+                      <span>Heart Rate</span> <Heart size={16} />
+                    </div>
+                    <div style={{ fontSize: '2.2rem', fontWeight: 700, color: hrIsAnomaly ? '#ff3366' : 'var(--white)', fontFamily: 'var(--font-mono)', transition: 'color 0.3s' }}>
+                      {hr} <span style={{ fontSize: '0.85rem', color: '#8c9bb4', fontWeight: 400 }}>bpm</span>
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: '#8c9bb4', marginTop: '2px' }}>Normal: 60–100 bpm</div>
                   </div>
-                  <div style={{ fontSize: '2.2rem', fontWeight: 700, color: hrIsAnomaly ? '#ff3366' : 'var(--white)', fontFamily: 'var(--font-mono)', transition: 'color 0.3s' }}>
-                    {hr} <span style={{ fontSize: '0.85rem', color: '#8c9bb4', fontWeight: 400 }}>bpm</span>
-                  </div>
-                  <div style={{ fontSize: '0.7rem', color: '#8c9bb4', marginTop: '2px' }}>Normal: 60–100 bpm</div>
-                </div>
 
-                {/* SpO2 */}
-                <div style={{ background: 'rgba(0, 245, 255, 0.06)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(0, 245, 255, 0.15)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--cyan)', marginBottom: '0.25rem', fontSize: '0.85rem' }}>
-                    <span>SpO₂</span> <Droplet size={16} />
+                  {/* SpO2 */}
+                  <div style={{ background: 'rgba(0, 245, 255, 0.06)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(0, 245, 255, 0.15)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--cyan)', marginBottom: '0.25rem', fontSize: '0.85rem' }}>
+                      <span>SpO₂</span> <Droplet size={16} />
+                    </div>
+                    <div style={{ fontSize: '2.2rem', fontWeight: 700, color: spo2 < 94 ? '#ff3366' : 'var(--white)', fontFamily: 'var(--font-mono)' }}>
+                      {spo2} <span style={{ fontSize: '0.85rem', color: '#8c9bb4', fontWeight: 400 }}>%</span>
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: '#8c9bb4', marginTop: '2px' }}>Normal: 95–99%</div>
                   </div>
-                  <div style={{ fontSize: '2.2rem', fontWeight: 700, color: spo2 < 94 ? '#ff3366' : 'var(--white)', fontFamily: 'var(--font-mono)' }}>
-                    {spo2} <span style={{ fontSize: '0.85rem', color: '#8c9bb4', fontWeight: 400 }}>%</span>
-                  </div>
-                  <div style={{ fontSize: '0.7rem', color: '#8c9bb4', marginTop: '2px' }}>Normal: 95–99%</div>
-                </div>
 
-                {/* Blood Pressure */}
-                <div style={{ background: 'rgba(0, 255, 136, 0.06)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(0, 255, 136, 0.15)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--green)', marginBottom: '0.25rem', fontSize: '0.85rem' }}>
-                    <span>Blood Pressure</span> <Gauge size={16} />
+                  {/* Blood Pressure */}
+                  <div style={{ background: 'rgba(0, 255, 136, 0.06)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(0, 255, 136, 0.15)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--green)', marginBottom: '0.25rem', fontSize: '0.85rem' }}>
+                      <span>Blood Pressure</span> <Gauge size={16} />
+                    </div>
+                    <div style={{ fontSize: '2.2rem', fontWeight: 700, color: bpSys > 140 ? '#ff3366' : 'var(--white)', fontFamily: 'var(--font-mono)' }}>
+                      {bpSys}/{bpDia} <span style={{ fontSize: '0.85rem', color: '#8c9bb4', fontWeight: 400 }}>mmHg</span>
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: '#8c9bb4', marginTop: '2px' }}>Normal: 90–120/60–80</div>
                   </div>
-                  <div style={{ fontSize: '2.2rem', fontWeight: 700, color: bpSys > 140 ? '#ff3366' : 'var(--white)', fontFamily: 'var(--font-mono)' }}>
-                    {bpSys}/{bpDia} <span style={{ fontSize: '0.85rem', color: '#8c9bb4', fontWeight: 400 }}>mmHg</span>
-                  </div>
-                  <div style={{ fontSize: '0.7rem', color: '#8c9bb4', marginTop: '2px' }}>Normal: 90–120/60–80</div>
-                </div>
 
-                {/* Temperature */}
-                <div style={{ background: 'rgba(255, 170, 0, 0.06)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255, 170, 0, 0.15)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ffaa00', marginBottom: '0.25rem', fontSize: '0.85rem' }}>
-                    <span>Temperature</span> <Thermometer size={16} />
+                  {/* Temperature */}
+                  <div style={{ background: 'rgba(255, 170, 0, 0.06)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255, 170, 0, 0.15)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ffaa00', marginBottom: '0.25rem', fontSize: '0.85rem' }}>
+                      <span>Temperature</span> <Thermometer size={16} />
+                    </div>
+                    <div style={{ fontSize: '2.2rem', fontWeight: 700, color: temp > 38 ? '#ff3366' : 'var(--white)', fontFamily: 'var(--font-mono)' }}>
+                      {typeof temp === 'number' ? temp.toFixed(1) : temp} <span style={{ fontSize: '0.85rem', color: '#8c9bb4', fontWeight: 400 }}>°C</span>
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: '#8c9bb4', marginTop: '2px' }}>Normal: 36.5–37.2°C</div>
                   </div>
-                  <div style={{ fontSize: '2.2rem', fontWeight: 700, color: temp > 38 ? '#ff3366' : 'var(--white)', fontFamily: 'var(--font-mono)' }}>
-                    {typeof temp === 'number' ? temp.toFixed(1) : temp} <span style={{ fontSize: '0.85rem', color: '#8c9bb4', fontWeight: 400 }}>°C</span>
-                  </div>
-                  <div style={{ fontSize: '0.7rem', color: '#8c9bb4', marginTop: '2px' }}>Normal: 36.5–37.2°C</div>
                 </div>
 
                 {/* ML Condition Label */}
@@ -181,6 +195,7 @@ export default function DashboardPreview() {
                     color: conditionLabel === 'CRITICAL' ? '#ff3366' : '#ffaa00',
                     fontSize: '0.75rem', fontWeight: 600, letterSpacing: '1px',
                     border: `1px solid ${conditionLabel === 'CRITICAL' ? 'rgba(255,51,102,0.3)' : 'rgba(255,170,0,0.3)'}`,
+                    marginTop: '0.75rem'
                   }}>
                     ML: {conditionLabel} ({vitals?.rf_confidence ? (vitals.rf_confidence * 100).toFixed(0) + '% conf' : ''})
                   </div>
