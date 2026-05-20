@@ -27,6 +27,8 @@ dist-ssr
 venv/
 __pycache__/
 vitalsense-backend/data/*.db
+vitalsense-backend/data/*.csv
 vitalsense-backend/.env
 .env
 .vercel
+
