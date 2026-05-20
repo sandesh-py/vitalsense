@@ -12,7 +12,7 @@ const features = [
   {
     icon: <Cpu />,
     title: 'AI Classification',
-    desc: 'Advanced ML models (Random Forest, SVM) predict patient conditions accurately.',
+    desc: 'Advanced ML models (Decision Tree, SVM) predict patient conditions accurately.',
     colSpan: 2
   },
   {

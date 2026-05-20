@@ -83,7 +83,7 @@ export default function AnomalyDemo() {
           style={{ textAlign: 'center', marginBottom: '4rem' }}
         >
           <h2 className="section-title">Anomaly Detection <span style={{ color: '#ff3366' }}>In Action (Live)</span></h2>
-          <p className="section-subtitle">Watch VitalSense detect a cardiac anomaly in real-time using Isolation Forest and Z-Score analysis directly from the backend.</p>
+          <p className="section-subtitle">Watch VitalSense detect a cardiac anomaly in real-time using Isolation Forest analysis directly from the backend.</p>
         </motion.div>
 
         {/* Main Demo Container */}
@@ -188,7 +188,7 @@ export default function AnomalyDemo() {
 
               {/* Pipeline indicator */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
-                {['Ingest', 'Normalize', 'Z-Score', 'Isolation Forest', 'Decision'].map((step, i) => (
+                {['Ingest', 'Normalize', 'Isolation Forest', 'Decision'].map((step, i) => (
                   <React.Fragment key={i}>
                     <motion.div
                       animate={{
@@ -211,7 +211,7 @@ export default function AnomalyDemo() {
                     >
                       {step}
                     </motion.div>
-                    {i < 4 && <ArrowRight size={12} color="#8c9bb4" />}
+                    {i < 3 && <ArrowRight size={12} color="#8c9bb4" />}
                   </React.Fragment>
                 ))}
               </div>
@@ -231,27 +231,9 @@ export default function AnomalyDemo() {
                     <span style={{ color: 'var(--green)' }}>●</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Z-Score Analysis</span>
+                    <span>Decision Tree (clf)</span>
                     <span style={{ color: 'var(--green)' }}>●</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Random Forest (clf)</span>
-                    <span style={{ color: 'var(--green)' }}>●</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Z-Score readout */}
-              <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '1rem', border: '1px solid rgba(255,255,255,0.06)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                  <TrendingUp size={16} color={zScore > 2 ? '#ff3366' : 'var(--cyan)'} />
-                  <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Z-Score</span>
-                </div>
-                <div style={{ fontSize: '2rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: zScore > 2 ? '#ff3366' : 'var(--white)' }}>
-                  {zScore !== null ? zScore : '—'}
-                </div>
-                <div style={{ fontSize: '0.75rem', color: '#8c9bb4', marginTop: '0.25rem' }}>
-                  {zScore > 3 ? 'Severe anomaly (|z| > 3)' : zScore > 2 ? 'Anomaly detected (|z| > 2)' : 'Within normal range'}
                 </div>
               </div>
 
@@ -290,7 +272,7 @@ export default function AnomalyDemo() {
                       <span style={{ fontWeight: 700, color: '#ff3366', fontSize: '0.95rem' }}>ANOMALY ALERT</span>
                     </div>
                     <p style={{ color: 'rgba(255, 200, 200, 0.9)', fontSize: '0.8rem', margin: 0, lineHeight: 1.5 }}>
-                      {anomalyType !== 'Unknown' ? anomalyType : 'Severe anomaly'} detected — HR {currentHR} bpm exceeds threshold. Z-score: {zScore}. Notifying medical team.
+                      {anomalyType !== 'Unknown' ? anomalyType : 'Severe anomaly'} detected — HR {currentHR} bpm exceeds threshold. Notifying medical team.
                     </p>
                   </motion.div>
                 )}
